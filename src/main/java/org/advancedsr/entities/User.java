@@ -36,4 +36,7 @@ public class User implements Serializable {
     @JoinColumn(name="roleName")
     @Nonnull
     private Role role;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    private UserStorage userStorage;
 }
