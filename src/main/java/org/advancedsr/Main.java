@@ -1,4 +1,4 @@
-package org.example;
+package org.advancedsr;
 
 public class Main {
     public static void main(String[] args) {
