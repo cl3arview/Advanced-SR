@@ -16,6 +16,10 @@ public class UserStorageDTO {
         this.largeObject = largeObject;
     }
 
+    public UserStorageDTO() {
+
+    }
+
 
     public Long getUserStorageId() {
         return userStorageId;

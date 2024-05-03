@@ -7,6 +7,8 @@ import jakarta.annotation.Nonnull;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity
@@ -36,6 +38,9 @@ public class User implements Serializable {
     @JoinColumn(name="roleName")
     @Nonnull
     private Role role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<Image> images = new HashSet<>();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
     private UserStorage userStorage;

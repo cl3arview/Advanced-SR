@@ -25,7 +25,7 @@ public class UserStorage implements Serializable {
 
     @Lob
     @JoinColumn(name="large_object",columnDefinition = "oid")
-    @Nonnull
+    //@Nonnull
     private Long largeObject;
 
 

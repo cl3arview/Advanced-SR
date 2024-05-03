@@ -3,8 +3,10 @@ package org.advancedsr.services;
 import org.advancedsr.dtos.UserDTO;
 import org.advancedsr.entities.User;
 import org.advancedsr.entities.Role;
+import org.advancedsr.entities.UserStorage;
 import org.advancedsr.repositories.UserRepository;
 import org.advancedsr.repositories.RoleRepository;
+import org.advancedsr.repositories.UserStorageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,9 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private UserStorageRepository userStorageRepository;
+
 
 
 
@@ -35,11 +40,13 @@ public class UserService {
         User user = convertToEntity(userDTO);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // added password encoding in user creation
         user = userRepository.save(user);
+        createUserStorageForUser(user);
         return convertToDTO(user);
     }
 
     public UserDTO getUserByUsername(String username) {
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
         return convertToDTO(user);
     }
 
@@ -75,5 +82,14 @@ public class UserService {
         user.setActif(dto.getActif());
         user.setRole(role); // Set the role fetched from the database
         return user;
+    }
+
+
+    private void createUserStorageForUser(User user) {
+        UserStorage userStorage = new UserStorage();
+        userStorage.setUser(user);
+        userStorage.setLargeObject(null);
+        userStorageRepository.save(userStorage);
+
     }
 }
