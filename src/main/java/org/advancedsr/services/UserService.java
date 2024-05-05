@@ -1,5 +1,7 @@
 package org.advancedsr.services;
 
+import org.advancedsr.dtos.RegisterDTO;
+import org.advancedsr.dtos.RoleDTO;
 import org.advancedsr.dtos.UserDTO;
 import org.advancedsr.entities.User;
 import org.advancedsr.entities.Role;
@@ -29,6 +31,9 @@ public class UserService {
     @Autowired
     private UserStorageRepository userStorageRepository;
 
+    @Autowired
+    private RoleService roleService;
+
 
 
 
@@ -36,9 +41,14 @@ public class UserService {
         return userRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    public UserDTO createUser(UserDTO userDTO) {
-        User user = convertToEntity(userDTO);
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // added password encoding in user creation
+    public UserDTO createUser(RegisterDTO registerDTO) {
+
+
+        User user = new User();
+        user.setUsername(registerDTO.getUsername());
+        user.setPassword(passwordEncoder.encode(registerDTO.getPassword())); // added password encoding in user creation
+        Role role = roleRepository.findById("User").orElseThrow(() -> new RuntimeException("Role not found while user creation"));
+        user.setRole(role);
         user = userRepository.save(user);
         createUserStorageForUser(user);
         return convertToDTO(user);

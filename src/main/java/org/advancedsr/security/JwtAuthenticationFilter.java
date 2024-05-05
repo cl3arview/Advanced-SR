@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -20,32 +22,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtTokenProvider tokenProvider;
+    @Autowired
+    private UserDetailsService userDetailsService;  // Add this
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String jwt = getJwtFromRequest(request);
-        if (jwt != null && tokenProvider.validateToken(jwt)) {
-            try {
-                String username = tokenProvider.getUsernameFromJWT(jwt);
-                if (username != null) {
-                    UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(username, null, null); // No authorities needed here
-                    authRequest.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                    // Manually set authentication
-                    SecurityContextHolder.getContext().setAuthentication(authRequest);
+        @Override
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+            String jwt = getJwtFromRequest(request);
+            if (jwt != null && tokenProvider.validateToken(jwt)) {
+                try {
+                    String username = tokenProvider.getUsernameFromJWT(jwt);
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } catch (UsernameNotFoundException ex) {
+                    SecurityContextHolder.clearContext();
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User not found");
+                    return;
                 }
-            } catch (UsernameNotFoundException ex) {
-                SecurityContextHolder.clearContext();
             }
+            filterChain.doFilter(request, response);
         }
-        filterChain.doFilter(request, response);
-    }
 
-    private String getJwtFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        private String getJwtFromRequest(HttpServletRequest request) {
+            String bearerToken = request.getHeader("Authorization");
+            if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+                return bearerToken.substring(7);
+            }
+            return null;
         }
-        return null;
     }
-}

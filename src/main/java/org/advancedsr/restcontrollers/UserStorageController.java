@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.sql.SQLException;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/userstorage")
 public class UserStorageController {
 

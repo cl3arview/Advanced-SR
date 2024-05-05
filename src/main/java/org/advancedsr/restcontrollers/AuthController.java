@@ -1,6 +1,7 @@
 package org.advancedsr.restcontrollers;
 
 import jakarta.validation.Valid;
+import org.advancedsr.dtos.RegisterDTO;
 import org.advancedsr.dtos.UserDTO;
 import org.advancedsr.payload.LoginRequest;
 import org.advancedsr.payload.LoginResponse;
@@ -12,15 +13,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import java.time.Instant;
 
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -57,10 +57,11 @@ public class AuthController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<UserDTO> registerUser(@RequestBody UserDTO userDTO) {
-        UserDTO newUser = userService.createUser(userDTO);
-        newUser.setPassword(null); // ensuring the password is not sent back in the ResponseEntity (Double measure since it's taken care of in the entity-to-DTO conversion)
+    public ResponseEntity<UserDTO> registerUser(@RequestBody RegisterDTO registerDTO) {
+        UserDTO newUser = userService.createUser(registerDTO); // Ensure your service can handle RegisterDTO
+        newUser.setPassword(null); // Hide password in the response
         return ResponseEntity.ok(newUser);
     }
+
 
 }

@@ -15,6 +15,7 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/images")
 public class ImageController {
 
